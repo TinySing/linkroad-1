@@ -1,0 +1,533 @@
+<template>
+  <!--主体背景部分-->
+  <div class="person_main">
+    <i>当前位置：人员管理</i>
+    <!--上半部分-->
+    <div class="top_area">
+      <!--搜索框部分-->
+      <!--<input class="search" type="text" placeholder="姓名/工号/手机号">-->
+      <el-input @input="change($event)" v-model="search" class="search" type="text" placeholder="姓名/工号/手机号"></el-input>
+      <div class="but">
+        <button>查询</button>
+      </div>
+      <!--选择器插件-->
+      <el-select v-model="value1" filterable :placeholder="value1" size="small"
+                 style="float: right;width:105px;margin-top: 15px;margin-right:28px;">
+        <el-option
+          v-for="item in options"
+          :key="item.value1"
+          :label="item.label"
+          :value="item.value1">
+        </el-option>
+      </el-select>
+    </div>
+    <!--下半部分-->
+    <div class="bottom_area"  style="padding:3vh 15px 0">
+      <!--表格插件-->
+      <!--<div class="main-content">-->
+        <el-table :header-cell-style="{background:'#f0f5f9',color:'#666'}"
+                  :data="tables"
+                  border
+                  :stripe="true"
+                  style="display:block;font-size:12px;max-height: 51vh;overflow: auto"
+                  header-row-class-name="tableHead"
+        >
+          <el-table-column
+            prop="infor"
+            label="人员信息"
+            align="center">
+            <template>
+              <p>万人迷</p>
+              <p>科技中心英语研发部</p>
+              <p>应用规划师</p>
+            </template>
+          </el-table-column>
+          <el-table-column
+            prop="name"
+            label="相关系统"
+            align="center">
+            <template slot-scope="scope">
+              <el-button @click="centerDialogOne = true" type="text" size="small" style="text-decoration:underline;">
+                查看系统
+              </el-button>
+              <!--弹窗部分-->
+              <el-dialog
+                title="系统管理"
+                :visible.sync="centerDialogOne"
+                width="633"
+                center>
+                <div class="dialogBox"
+                     style="padding-bottom: 10px;">
+                  <div class="contentText">
+                    <div class="diaBox">
+                      <el-table
+                        :header-cell-style="{background:'#f0f5f9',color:'#666'}"
+                        border
+                        :data="sysList"
+                        style="width:602px!important;"
+                      >
+                        <el-table-column
+                          prop="sysID"
+                          label="序号"
+                          width="100">
+                        </el-table-column>
+                        <el-table-column
+                          prop="sysCode"
+                          label="系统代码"
+                          width="100">
+                        </el-table-column>
+                        <el-table-column
+                          prop="sysName"
+                          label="系统名称"
+                          width="300">
+                        </el-table-column>
+                        <el-table-column
+                          prop="handle"
+                          label="操作"
+                          width="100">
+                          <template slot-scope="scope">
+                            <el-button @click="choose(scope.$index,sysList)" type="text" size="small"
+                                       style="cursor: pointer;font-family: '黑体';font-size: 16px;">
+                              √
+                            </el-button>
+                          </template>
+                        </el-table-column>
+                      </el-table>
+                    </div>
+                  </div>
+                </div>
+                <span slot="footer" class="dialog-footer"
+                      style="display:inline-block;width:300px;height:30px;margin-top: 23px;">
+          <el-button class="btn0" size="small" @click="centerDialogOne = false">取消</el-button>
+          <el-button class="btn1" type="primary" size="small" @click="centerDialogOne = false">确定</el-button>
+          </span>
+              </el-dialog>
+            </template>
+          </el-table-column>
+          <el-table-column
+            prop="address"
+            label="用户有效性"
+            align="center">
+          </el-table-column>
+          <!--点击操作出弹窗-->
+          <el-table-column
+            prop="address"
+            label="操作"
+            align="center">
+            <template slot-scope="scope">
+              <el-button @click="centerDialog = true" type="text" size="small" style="text-decoration:underline;">操作
+              </el-button>
+              <!--弹窗部分-->
+              <el-dialog
+                title="系统相关人员"
+                :visible.sync="centerDialog"
+                width="633"
+                center>
+                <div class="dialogBox"
+                     style="padding-bottom: 10px;">
+                  <div class="contentText">
+                    <div style="float: left;margin-left: 17px;">
+                      <p>责任系统：</p>
+                      <div class="border"/>
+                      <el-select v-model="value2" filterable :placeholder="value2" size="small"
+                                 style="float: left;width:105px;margin-top: 13px;margin-right:15px;">
+                        <el-option
+                          v-for="item in options2"
+                          :key="item.value2"
+                          :label="item.label"
+                          :value="item.value2">
+                        </el-option>
+                      </el-select>
+                      <button class="add">添加</button>
+                    </div>
+                    <div style="float: left;margin-left: 17px;margin-top: 10px;">
+                      <p>参与系统：</p>
+                      <div class="border"></div>
+                      <el-select v-model="value3" filterable :placeholder="value3" size="small"
+                                 style="float: left;width:105px;margin-top: 13px;margin-right:15px;">
+                        <el-option
+                          v-for="item in options3"
+                          :key="item.value3"
+                          :label="item.label"
+                          :value="item.value3">
+                        </el-option>
+                      </el-select>
+                      <button class="add">添加</button>
+                    </div>
+                  </div>
+                </div>
+                <span slot="footer" class="dialog-footer"
+                      style="display:inline-block;width:300px;height:30px;">
+          <el-button class="btn0" size="small" @click="centerDialog = false">取消</el-button>
+          <el-button class="btn1" type="primary" size="small" @click="centerDialog = false">确定</el-button>
+          </span>
+              </el-dialog>
+            </template>
+          </el-table-column>
+        </el-table>
+        <!--分页插件-->
+        <div class="block" style="width:600px;height: 6vh;position: absolute;bottom: 4vh;left:40vw;">
+          <el-pagination
+            background
+            @size-change="handleSizeChange"
+            @current-change="handleCurrentChange"
+            :current-page="currentPage"
+            :page-sizes="[5, 10]"
+            :page-size="pageSize"
+            layout="total,sizes,prev, pager, next, jumper"
+            :total="total">
+          </el-pagination>
+        </div>
+      <!--</div>-->
+    </div>
+  </div>
+
+</template>
+
+<script>
+
+  export default {
+    name: "ToolCom",
+
+    data() {
+      return {
+        total: null,
+        currentPage: 1,
+        pageSize: 5,
+        centerDialog: false,
+        centerDialogOne: false,
+        value: '',
+        value1: '全部',
+        value2: '项目A',
+        value3: '项目B',
+        search: '',
+        options: [
+          {
+            value1: '选项1',
+            label: '全部'
+          }, {
+            value1: '选项2',
+            label: '近一个月'
+          }, {
+            value1: '选项3',
+            label: '近三个月'
+          }, {
+            value1: '选项4',
+            label: '近半年'
+          }],
+        tableData: [
+          {
+            infor: '科技研发开发部科技研发开发部科技研发开发部科技研发开发部科技研发开发部',
+            address: '正常'
+          }, {
+            infor: '科技研发开发部',
+            address: '正常'
+          }, {
+            infor: '科技研发开发部科技研发开发部科技研发开发部科技研发开发部科技研发开发部',
+            address: '异常'
+          }, {
+            infor: '科技研发开发部科技研发开发部科技研发开发部科技研发开发部科技研发开发部',
+            address: '异常'
+          }, {
+            infor: '科技研发开发部科技研发开发部科技研发开发部科技研发开发部科技研发开发部',
+            address: '正常'
+          }, {
+            infor: '科技研发开发部科技研发开发部科技研发开发部科技研发开发部科技研发开发部',
+            address: '正常'
+          }, {
+            infor: '科技研发开发部科技研发开发部',
+            address: '正常'
+          }, {
+            infor: '科技研发开发部科',
+            address: '正常'
+          }, {
+            infor: '科技研发开发部科技研发开发部科技研发开发部科技研发开发部科技研发开发部',
+            address: '正常'
+          }],
+        options2: [
+          {
+            value2: '选项1',
+            label: '项目A'
+          }, {
+            value2: '选项2',
+            label: '项目B'
+          }, {
+            value2: '选项3',
+            label: '项目C'
+          }, {
+            value2: '选项4',
+            label: '项目D'
+          }],
+        options3: [
+          {
+            value3: '选项1',
+            label: '项目B'
+          }, {
+            value3: '选项2',
+            label: '项目E'
+          }, {
+            value3: '选项3',
+            label: '项目F'
+          }, {
+            value3: '选项4',
+            label: '项目G'
+          }],
+        sysList: [
+          // {
+          //   sysName: '人力资源管理系统',
+          // },
+          // {
+          //   sysName: '财务系统',
+          // },
+          // {
+          //   sysName: '监控系统',
+          // },
+          // {
+          //   sysName: '后台综合系统',
+          // },
+          // {
+          //   sysName: '全链路监控后台管理',
+          // },
+          // {
+          //   sysName: '图书馆管理登记系统',
+          // },
+          // {
+          //   sysName: '财务系统',
+          // },
+          // {
+          //   sysName: '监控系统',
+          // },
+          // {
+          //   sysName: '后台综合系统',
+          // }
+        ],
+      }
+    },
+    created() {
+      this.total = this.tableData.length
+    },
+    methods: {
+      change(e) {
+        this.$forceUpdate()
+      },
+      handleSizeChange(val) {
+        this.pageSize = val;
+      },
+      handleCurrentChange(val) {
+        this.currentPage = val;
+      },
+    },
+    // computed: {
+    //   tableData() {
+    //     return this.tableData.slice((this.currentPage - 1) * this.pageSize,
+    //       this.currentPage * this.pageSize)
+    //   }
+    // }
+    computed: {
+// 模糊搜索
+      tables() {
+        const search = this.search
+        if (search) {
+          return this.tableData.filter(data => {
+            return Object.keys(data).some(key => {
+              return String(data[key]).toLowerCase().indexOf(search) > -1
+            })
+          })
+        }
+        // return this.tableData
+        return this.tableData.slice((this.currentPage - 1) * this.pageSize,
+          this.currentPage * this.pageSize)
+      }
+    },
+  }
+</script>
+
+<style scoped>
+  /*去掉el-table的多余横线*/
+  .el-table::before {
+    z-index: inherit;
+    height: 0px !important;
+  }
+
+  .bottom_area >>> .el-table--striped .el-table__body tr.el-table__row--striped td {
+    background-color: #f0f9eb!important; /*替换为你需要的颜色，觉得优先级不够就加!important*/
+  }
+
+  /*弹窗样式*/
+  .dialogBox {
+    min-width: 500px;
+    max-width: 631px;
+    background: #fff;
+  }
+
+  .dialogBox .el-table >>> .cell {
+    text-align: center;
+  }
+
+  .bottom_area >>> .el-dialog__header {
+    height: 36px;
+    background-color: #66bded;
+    padding: 7px 20px 0 !important;
+  }
+
+  .bottom_area >>> .el-dialog__body {
+    padding-top: 13px !important;
+    min-height: 200px;
+  }
+
+  .bottom_area >>> .el-dialog__title {
+    height: 26px;
+    width: 631px;
+    background-color: #66bded;
+    font-size: 14px;
+    padding-top: 9px;
+    color: #fff;
+    text-align: center;
+    margin-bottom: 10px;
+  }
+
+  .bottom_area >>> .el-dialog__headerbtn {
+    top: 12px !important;
+  }
+
+  .bottom_area >>> .btn0, .bottom_area >>> .btn1 {
+    display: inline-block;
+    color: #66bded;
+    cursor: pointer;
+    background-color: #fff;
+    border: 1px solid #a3d7f4;
+    box-shadow: 0 2px 5px 2px rgba(145, 208, 243, 0.3);
+    width: 95px;
+    height: 30px;
+    font-weight: bold;
+  }
+
+  .bottom_area >>> .btn1 {
+    margin-left: 52px;
+    color: #fff !important;
+    background-color: #66bded;
+  }
+
+  .dialogBox .border {
+    width: 330px;
+    height: 61px;
+    border: 1px solid #e7e7e7;
+    float: left;
+    margin-top: 13px;
+    margin-right: 10px;
+  }
+
+  .dialogBox p {
+    font-size: 12px;
+    color: #666;
+    text-align: left;
+    float: left;
+    margin-top: 16px;
+  }
+
+  .dialogBox .add {
+    width: 80px;
+    height: 30px;
+    background-color: #fff;
+    display: inline-block;
+    float: right;
+    color: #66bded;
+    margin-top: 13px;
+    font-weight: bold;
+    border: 1px solid #a3d7f4;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px 2px rgba(145, 208, 243, 0.3);
+    cursor: pointer;
+  }
+
+  /*.main-content {*/
+    /*margin: 0 auto;*/
+    /*width: 1140px;*/
+    /*min-width: 1060px;*/
+  /*}*/
+
+  /*主体背景部分*/
+  .person_main {
+    height: 87vh;
+    min-width: 1060px;
+    background-color: #f6f7ff
+  }
+
+  .person_main i {
+    display: inline-block;
+    color: #444;
+    font-size: 12px;
+    margin-top: 17px;
+    margin-left: 18px;
+  }
+
+  /*上半部分*/
+  .top_area {
+    margin: 11px 18px 0;
+    height: 9vh;
+    min-width: 1060px;
+    background-color: #fff;
+    box-shadow: 0 0 8px 3px rgba(0, 0, 0, 0.1);
+  }
+
+  /*搜索框*/
+  .top_area .search {
+    float: left;
+    width: 270px;
+    height: 20px;
+    margin-left: 24px;
+    margin-top: 15px;
+  }
+
+  .top_area >>> .el-input__inner {
+    height: 27px;
+  }
+
+  .top_area >>> .el-select .el-input .el-select__caret {
+    line-height: 12px;
+  }
+
+  .top_area .but {
+    float: left;
+    display: inline-block;
+    margin-top: 15px;
+  }
+
+  .top_area .but button {
+    width: 72px;
+    height: 27px;
+    margin-left: 25px;
+    border: none;
+    background-color: #43abe9;
+    border-radius: 5px;
+    color: #fff;
+    box-shadow: 0 2px 5px 2px rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+  }
+
+  /*下半部分*/
+  .bottom_area {
+    height: 63vh;
+    min-width: 1060px;
+    background-color: #fff;
+    box-shadow: 0 0 8px 3px rgba(0, 0, 0, 0.1);
+    margin: 17px 18px 0;
+  }
+
+  /*.bottom_area .el-table {*/
+    /*position: absolute;*/
+    /*width: 1081px !important;*/
+    /*margin-left: 18px;*/
+    /*margin-top: 22px;*/
+  /*}*/
+
+  .bottom_area >>> .tableHead {
+    font-size: 14px;
+    font-family: '黑体';
+  }
+
+  .bottom_area >>> .el-input--small .el-input__inner {
+    height: 30px;
+    line-height: 28px;
+  }
+</style>

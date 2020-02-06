@@ -1,0 +1,159 @@
+<template>
+  <div class="big">
+    <div class="main" :style="headBg">
+      <img src="../../static/img/headLogo.png" alt="" class="headLogo">
+      <img src="../../static/img/headUser.png" alt="" class="headUser">
+      <p>您好，{{userInfo}}</p>
+      <img src="../../static/img/headBell.png" alt="" class="headBell">
+      <!--<i class="el-icon-right" @click="out"></i>-->
+      <el-button type="text" @click="open"><img src="../../static/img/link.jpg" alt="" class="link"></el-button>
+      <!--<div id="logOut" :class="flag?'showLogin':'hideLogin'">-->
+      <!--<ul>-->
+      <!--<li @click="out">注销</li>-->
+      <!--</ul>-->
+      <!--</div>-->
+    </div>
+  </div>
+
+</template>
+
+<script>
+  export default {
+    name: 'Head',
+    data() {
+      return {
+        flag: true,
+        userInfo: sessionStorage.getItem("userName"),
+        headBg: {
+          backgroundImage: "url(" + require("../../static/img/headBg.png") + ") ",
+          backgroundRepeat: "no-repeat",
+          backgroundSize: "100% 100%"
+        },
+
+      }
+    },
+    methods: {
+      open() {
+        this.$confirm('是否退出登录', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(() => {
+          this.$axios.post('/monitorCon/logout').then((response) => {
+            console.log(response.data)
+            sessionStorage.removeItem("userName");
+            sessionStorage.removeItem("userId");
+            this.$router.push({path: '/login'});
+            this.$message({
+              type: 'success',
+              message: '退出成功!',
+            });
+          });
+        }).catch(() => {
+          // this.$message({
+          //   type: 'info',
+          //   message: '已取消退出'
+          // });
+        });
+      },
+      // tabLogin() {
+      //   this.flag = !this.flag
+      // },
+      // out() {
+      //    sessionStorage.removeItem("userName");
+      //    this.$router.push({path: '/login'});
+      // }
+    }
+  }
+</script>
+
+<style scoped>
+  .big {
+    width: 100vw;
+    height: 100%;
+    min-width: 1366px;
+  }
+
+  .main {
+    width: 100%;
+    height: 13vh;
+  }
+
+  .main .headLogo {
+    float: left;
+    width: 380px;
+    height: 32px;
+    margin-top: 4vh;
+    margin-left: 40px;
+  }
+
+  .main .headUser {
+    position: absolute;
+    width: 18px;
+    height: 18px;
+    left: 80vw;
+    top: 5vh;
+  }
+
+  .main p {
+    font-family: "微软雅黑";
+    font-size: 14px;
+    color: #fff;
+    position: absolute;
+    width: 200px;
+    height: 15px;
+    left: 82vw;
+    top: 5vh;
+  }
+
+  .main .headBell {
+    position: absolute;
+    width: 18px;
+    height: 18px;
+    left: 94vw;
+    top: 5vh;
+  }
+
+  .main .link {
+    position: absolute;
+    width: 18px;
+    height: 18px;
+    left: 97vw;
+    top: 5vh;
+    cursor: pointer;
+  }
+
+  .el-icon-right {
+    position: absolute;
+    font-size: 20px;
+    color: #fff;
+    left: 97vw;
+    top: 5vh;
+    cursor: pointer;
+  }
+
+  /*.showLogin {*/
+  /*display: none;*/
+  /*}*/
+
+  /*.hideLogin {*/
+  /*display: block;*/
+  /*}*/
+
+  /*.main #logOut {*/
+  /*width: 50px;*/
+  /*top: 50px;*/
+  /*position: absolute;*/
+  /*right: 18px;*/
+  /*background-color: rgba(255,255,255,.8);*/
+  /*}*/
+
+  /*.main ul {*/
+  /*height: 50px;*/
+  /*text-align: center;*/
+  /*cursor: pointer;*/
+  /*}*/
+  /*.main li:hover {*/
+  /*text-decoration: underline;*/
+  /*}*/
+</style>
