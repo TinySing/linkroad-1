@@ -1,0 +1,763 @@
+<template>
+  <!--主体背景部分-->
+  <div class="monitor_main">
+    <p>当前位置：监控信息</p>
+    <!--上半部分-->
+    <div class="monitor_msg">
+      <div class="main-content">
+        <div class="leftBox" style="width:300px;float:left;margin-left:50px;position: relative;">
+          <!--监控项分类选择器-->
+          <i class="one">监控项分类:</i>
+          <el-select v-model="valueOne" placeholder="请选择" @change="togDisabled(valueOne)" :style={zIndex:1}>
+            <el-option
+              v-for="item in optionsOne"
+              :key="item.valueOne"
+              :label="item.labelOne"
+              :value="item.valueOne">
+            </el-option>
+          </el-select>
+          <!--弹窗列表+输入框-->
+          <i class="three">请选择系统:</i>
+          <!--选择系统输入框-->
+          <el-button
+            style="background-color: rgba(255,255,255,.1);position: absolute;top:56px;width:195px;border: none;height: 30px;"
+            @click="centerDialog = true"></el-button>
+          <div style="display: inline-block" @click="centerDialog = true">
+            <input placeholder="点击选择系统"
+                   class="system"
+                   type="text"
+                   id="indexText"
+                   value=""
+                   disabled
+                   v-model="indexText"
+            />
+          </div>
+          <i class="el-icon-circle-close" @click="empty"></i>
+          <!--点击出现弹窗列表-->
+          <el-dialog
+            title="请选择您的系统"
+            :visible.sync="centerDialog"
+            :close-on-click-modal="false"
+            width="633"
+            center>
+            <!--列表-->
+            <div class="diaBox">
+              <el-input class="search" type="text" v-model="searchData" placeholder="系统名称"></el-input>
+              <el-button size="middle" type="primary" @click="search"
+                         style="float:left;margin-left: 10px;padding: 6px 15px;margin-top:3px;">搜索
+              </el-button>
+              <el-button size="middle" type="primary" @click="reset"
+                         style="float:left;margin-left: 10px;padding: 6px 15px;margin-top:3px;">重置
+              </el-button>
+              <!--style="width: 601px;margin-left: 14px;"-->
+              <el-table
+                :header-cell-style="{background:'#f0f5f9',color:'#666'}"
+                border
+                :data="sysList"
+              >
+                <el-table-column
+                  prop="sysCode"
+                  label="系统编号"
+                >
+                </el-table-column>
+                <el-table-column
+                  prop="sysName"
+                  label="系统名称"
+                >
+                </el-table-column>
+                <el-table-column
+                  prop="handle"
+                  label="操作"
+                >
+                  <template slot-scope="scope">
+                    <el-button @click="choose(scope.$index,sysList)" type="text" size="small"
+                               style="cursor: pointer;font-family: '黑体';font-size: 16px;">
+                      √
+                    </el-button>
+                  </template>
+                </el-table-column>
+              </el-table>
+            </div>
+            <span slot="footer" class="dialog-footer">
+           <!--弹窗上的分页-->
+          <div class="block" style="margin-left: auto;">
+            <el-pagination
+              @current-change="handleCurrentChange"
+              :current-page="currentPage"
+              :page-size="pageSize"
+              layout="total,prev,pager, next"
+              :total="total">
+            </el-pagination>
+          </div>
+        </span>
+          </el-dialog>
+        </div>
+        <div class="middleBox" style="width:300px;float:left;margin-left:55px;">
+          <!--日期插件-->
+          <div class="block" style="padding-top:4px;">
+            <span class="demonstration">日期:</span>
+            <el-date-picker
+              v-model="valueData"
+              type="daterange"
+              range-separator="至"
+              start-placeholder="开始日期"
+              end-placeholder="结束日期"
+              :picker-options="pickerOptions">
+            </el-date-picker>
+          </div>
+          <!--设备IP选择器-->
+          <i class="four">设备IP:</i>
+          <el-select :disabled="changeDisabled" v-model="valueThree" placeholder="请选择" @change="change3(valueThree)"
+                     style="width: 230px;">
+            <el-option
+              v-for="item in optionsThree"
+              :key="item.valueThree"
+              :label="item.labelThree"
+              :value="item.valueThree"
+            >
+            </el-option>
+          </el-select>
+        </div>
+        <div class="RightBox" style="width:300px;float:left;margin-left:50px;">
+          <!--监控维度选择器-->
+          <i class="two">监控维度:</i>
+          <el-select v-model="valueTwo" :class="{'great':isActive}" placeholder="请选择" @change="change2(valueTwo)">
+            <el-option
+              v-for="item in optionsTwo"
+              :key="item.valueTwo"
+              :label="item.labelTwo"
+              :value="item.valueTwo">
+            </el-option>
+          </el-select>
+          <el-select v-model="valueTwoCopy" :class="{'great':isActiveCopy}" placeholder="请选择"
+                     @change="change2Copy(valueTwoCopy)">
+            <el-option
+              v-for="item in optionsTwoCopy"
+              :key="item.valueTwoCopy"
+              :label="item.labelTwoCopy"
+              :value="item.valueTwoCopy">
+            </el-option>
+          </el-select>
+          <!--时间选择器-->
+          <i class="five">时间:</i>
+          <el-select v-model="valueFour" placeholder="请选择" @change="change4(valueFour)">
+            <el-option
+              v-for="item in optionsFour"
+              :key="item.valueFour"
+              :label="item.labelFour"
+              :value="item.valueFour">
+            </el-option>
+          </el-select>
+          <!--时间选择器-->
+          <!--<i class="five">时间:</i>-->
+          <!--<el-select v-model="valueFour" placeholder="请选择" @change="change4(valueFour)">-->
+          <!--<el-option-->
+          <!--v-for="item in optionsFour"-->
+          <!--:key="item.valueFour"-->
+          <!--:label="item.labelFour"-->
+          <!--:value="item.valueFour">-->
+          <!--</el-option>-->
+          <!--</el-select>-->
+        </div>
+      </div>
+    </div>
+    <!--下半部分-->
+    <div class="monitor_echarts" style="padding:3vh 15px 0">
+      <!--<div class="main-contentOne">-->
+      <el-table :header-cell-style="{background:'#f0f5f9',color:'#666'}"
+                :data="tableData.slice((currentPageOne-1)*pageSizeOne,currentPageOne*pageSizeOne)"
+                border
+                empty-text="暂无数据"
+                style="display:block;font-size:12px;height:40vh;min-height:250px;overflow: auto;"
+                header-row-class-name="tableHead"
+      >
+        <el-table-column
+          prop="appCode"
+          label="系统编号"
+          align="center">
+        </el-table-column>
+        <!--<el-table-column-->
+        <!--prop="appName"-->
+        <!--label="系统名称"-->
+        <!--align="center">-->
+        <!--</el-table-column>-->
+        <el-table-column
+          prop="jobId"
+          label="任务ID"
+          align="center">
+        </el-table-column>
+        <el-table-column
+          prop="jobName"
+          label="任务名称"
+          align="center">
+        </el-table-column>
+        <el-table-column
+          prop="startTime"
+          label="开始时间"
+          align="center">
+        </el-table-column>
+        <el-table-column
+          prop="endTime"
+          label="结束时间"
+          align="center">
+        </el-table-column>
+        <el-table-column
+          prop="runTime"
+          label="任务时长"
+          align="center">
+        </el-table-column>
+        <el-table-column
+          prop="isSuccess"
+          label="执行结果"
+          align="center">
+        </el-table-column>
+      </el-table>
+      <div class="block" style="width:600px;height: 6vh;margin-top: 3vh;left:40vw;">
+        <el-pagination
+          background
+          @size-change="handleSizeChangeOne"
+          @current-change="handleCurrentChangeOne"
+          :current-page="currentPageOne"
+          :page-sizes="pageSizesOne"
+          :page-size="pageSizeOne"
+          layout="total,sizes,prev, pager, next, jumper"
+          :total="totalOne">
+        </el-pagination>
+      </div>
+      <!--</div>-->
+    </div>
+  </div>
+</template>
+
+<script>
+  export default {
+    name: "MonitorMsg",
+    data() {
+      return {
+        indexText: '',
+        nowSysCode: '',//当前系统编号
+        searchData: '',  // 实现搜索
+        isActive: false,
+        isActiveCopy: true,
+        changeDisabled: true,
+        // 弹窗的分页
+        total: null,
+        currentPage: 1,
+        pageSize: 8,
+        // 下部分列表的分页
+        totalOne: null,
+        currentPageOne: 1,
+        pageSizeOne: 10,
+        pageSizesOne: [10, 20, 30, 40, 50],
+        centerDialog: false,
+        valueOne: 'System',
+        valueData: '',
+        valueTwo: 'MonitorSeven',
+        valueTwoCopy: '',
+        valueThree: '',
+        valueFour: 'TimeOne',
+        pickerOptions: {
+          disabledDate(time) {
+            return time.getTime() > Date.now() - 8.64e7;
+          },
+        },
+        //批处理的表格
+        tableData: [],
+        // 选择系统
+        sysList: [],
+        // 选择监控项分类
+        optionsOne: [
+          {
+            valueOne: 'Equipment',
+            labelOne: '设备级'
+          },
+          {
+            valueOne: 'System',
+            labelOne: '系统级'
+          }],
+        //选择监控维度
+        optionsTwo: [
+          {
+            valueTwo: 'MonitorSeven',
+            labelTwo: '批处理情况'
+          }, {
+            valueTwo: 'MonitorEight',
+            labelTwo: '数据源连接池使用率'
+          }, {
+            valueTwo: 'MonitorNine',
+            labelTwo: '响应时间 top5事务'
+          }, {
+            valueTwo: 'MonitorTen',
+            labelTwo: '应用5分钟内吞吐率'
+          }, {
+            valueTwo: 'MonitorEleven',
+            labelTwo: '应用5分钟内错误率'
+          }, {
+            valueTwo: 'MonitorTwelve',
+            labelTwo: '慢SQL操作top5'
+          }, {
+            valueTwo: 'MonitorThirteen',
+            labelTwo: 'DB吞吐率'
+          }
+        ],
+        optionsTwoCopy: [
+          {
+            valueTwoCopy: 'MonitorOne',
+            labelTwoCopy: '磁盘空间'
+          },
+          {
+            valueTwoCopy: 'MonitorTwo',
+            labelTwoCopy: 'cpu使用率'
+          }, {
+            valueTwoCopy: 'MonitorThree',
+            labelTwoCopy: '内存使用率'
+          }, {
+            valueTwoCopy: 'MonitorFour',
+            labelTwoCopy: '磁盘IO情况'
+          }, {
+            valueTwoCopy: 'MonitorFive',
+            labelTwoCopy: 'Socket连接数'
+          }, {
+            valueTwoCopy: 'MonitorSix',
+            labelTwoCopy: 'FullGC/OC频率'
+          },
+        ],
+        //选择设备IP
+        optionsThree: [
+          {
+            valueThree: 'AddressOne',
+            labelThree: '10.8.198.*'
+          },
+          {
+            valueThree: 'AddressTwo',
+            labelThree: '10.8.199.*'
+          },
+          {
+            valueThree: 'AddressThree',
+            labelThree: '10.8.200.*'
+          },
+          {
+            valueThree: 'AddressFour',
+            labelThree: '10.8.201.*'
+          },
+          {
+            valueThree: 'AddressFive',
+            labelThree: '10.8.206.*'
+          },
+          {
+            valueThree: 'AddressSix',
+            labelThree: '10.8.207.*'
+          }
+        ],
+        //选择近期时间
+        optionsFour: [
+
+          {
+            valueFour: 'TimeOne',
+            labelFour: '近5分钟',
+          },
+          {
+            valueFour: 'TimeTwo',
+            labelFour: '近10分钟',
+          },
+          {
+            valueFour: 'TimeThree',
+            labelFour: '近30分钟',
+          },
+          {
+            valueFour: 'TimeFour',
+            labelFour: '近60分钟'
+          }
+        ],
+      }
+    },
+
+    methods: {
+      dialogData() {
+        let qs = require('qs');
+        let information = {"userId": ""};
+        this.$axios.post('/monitorCon/system/userPRole/queryProject', qs.stringify(information)).then((response) => {
+          //session为空
+          if (response === null) return
+          this.sysList = [];
+          //选择系统框是否默认显示第一条
+          //this.nowSysCode = response.data[0]['systemid'];
+          //document.getElementById('indexText').value = response.data[0]['systemname']
+          for (let i = 0; i < response.data.length; i++) {
+            this.sysList.push({
+              'sysCode': response.data[i]['projectid'],
+              'sysName': response.data[i]['projectname']
+            });
+          }
+          // 获取数据之后的实际分页
+          this.total = this.sysList.length;
+          this.data = this.sysList
+          this.searchList()
+        });
+      },
+      // 获取批处理情况的数据
+      batchData() {
+        let qs = require('qs');
+        let information = {"systemId": this.nowSysCode};
+        this.$axios.post('/monitorCon/dmMsg/query', qs.stringify(information)).then((response) => {
+          // if(response.data === ""){
+          //   this.emptyText = '暂无数据'
+          //   return
+          // }
+          this.tableData = [];
+          for (let i = 0; i < response.data.length; i++) {
+            if (response.data[i]['isSuccess'] === 'Y') {
+              response.data[i]['isSuccess'] = '成功'
+            } else {
+              response.data[i]['isSuccess'] = '失败'
+            }
+            this.tableData.push({
+              'appCode': response.data[i]['appCode'],
+              // 'appName': response.data[i]['appName'],
+              'jobId': response.data[i]['jobId'],
+              'jobName': response.data[i]['jobName'],
+              'startTime': response.data[i]['startTime'],
+              'endTime': response.data[i]['endTime'],
+              'runTime': response.data[i]['runTime'],
+              'isSuccess': response.data[i]['isSuccess']
+            });
+
+          }
+          // 获取数据之后的实际分页
+          this.totalOne = this.tableData.length;
+        });
+      },
+      // 处理数据,进行搜索
+      searchList() {
+        // es6过滤得到满足搜索条件的展示数据list
+        let sysList = this.data.filter((item, index) =>
+          item.sysName.includes(this.searchData)
+        )
+        this.sysList = sysList.filter((item, index) =>
+          index < this.currentPage * this.pageSize && index >= this.pageSize * (this.currentPage - 1)
+        )
+        this.total = sysList.length
+      },
+      // 重置后列表恢复，输入框清空
+      resetList() {
+        let resetList = this.data
+        this.sysList = resetList
+      },
+      // 弹窗的分页-当前页改变
+      handleCurrentChange(val) {
+        this.currentPage = val
+        this.searchList()
+      },
+
+      reset() {
+        this.resetList()
+        //重置后输入框清空
+        this.searchData = ""
+        this.dialogData()
+      },
+      // 搜索过滤数据
+      search() {
+        this.currentPage = 1
+        let qs = require('qs');
+        let information = {"systemid": "System"};
+        this.$axios.post('/monitorCon/system/userPRole/queryProject', qs.stringify(information)).then((response) => {
+          this.sysList = [];
+          for (let i = 0; i < response.data.length; i++) {
+            this.sysList.push({
+              'sysCode': response.data[i]['projectid'],
+              'sysName': response.data[i]['projectname']
+            });
+          }
+          // 获取数据之后的实际分页
+          this.total = this.sysList.length;
+          this.data = this.sysList
+          this.searchList()
+        });
+        //如果内容为空，则弹出提示
+        if (this.searchData === "") {
+          alert('系统不能为空，请重新输入')
+        }
+      },
+      // 根据监控项切换监控维度
+      togDisabled(valueOne) {
+        this.changeDisabled = !this.changeDisabled;
+        this.isActive = !this.isActive
+        this.isActiveCopy = !this.isActiveCopy
+        console.log(valueOne)
+      },
+
+      change2(valueTwo) {
+        //console.log(valueTwo)
+      },
+      change2Copy(valueTwoCopy) {
+        //console.log(valueTwoCopy)
+      },
+      change3(valueThree) {
+        //console.log(valueThree)
+      },
+      change4(valueFour) {
+        //console.log(valueFour)
+      },
+      //当前页改变时会触发
+      handleCurrentChangeOne(val) {
+        this.currentPageOne = val;
+      },
+      handleSizeChangeOne(val) {
+        this.pageSizeOne = val;
+      },
+      //将弹窗选择的值映射到输入框内
+      choose(index, sysList) {
+        this.centerDialog = false;
+        this.indexText = sysList[index].sysName;
+        this.nowSysCode = sysList[index].sysCode;
+        this.batchData();
+      },
+      //清空选择系统的输入框
+      empty() {
+        this.indexText = null;
+        this.$axios.post('/monitorCon/dmMsg/query').then((response) => {
+          this.tableData = [];
+          for (let i = 0; i < response.data.length; i++) {
+            if (response.data[i]['isSuccess'] === 'Y') {
+              response.data[i]['isSuccess'] = '成功'
+            } else {
+              response.data[i]['isSuccess'] = '失败'
+            }
+            this.tableData.push({
+              'appCode': response.data[i]['appCode'],
+              // 'appName': response.data[i]['appName'],
+              'jobId': response.data[i]['jobId'],
+              'jobName': response.data[i]['jobName'],
+              'startTime': response.data[i]['startTime'],
+              'endTime': response.data[i]['endTime'],
+              'runTime': response.data[i]['runTime'],
+              'isSuccess': response.data[i]['isSuccess']
+            });
+          }
+          // 获取数据之后的实际分页
+          this.totalOne = this.tableData.length;
+        });
+      }
+    },
+    computed: {},
+    mounted() {
+      this.batchData()
+      this.dialogData()
+    },
+    //分页
+    created() {
+      // this.pageList()
+      // this.total = this.sysList.length;
+      //console.log(this.indexText);
+
+    }
+  }
+</script>
+
+<style scoped>
+  /*去掉el-table的多余横线*/
+  .el-table::before {
+    /*z-index: inherit;*/
+    height: 0 !important;
+  }
+
+  .monitor_msg >>> .great {
+    display: none;
+  }
+
+  .main-content {
+    margin: 0 auto;
+    width: 79.2vw;
+    min-width: 1060px;
+    /*height:10vh;*/
+    /*margin-top:5vh;*/
+  }
+
+  .main-contentOne {
+    margin: 0 auto;
+    width: 79.2vw;
+    min-width: 1060px;
+  }
+
+  /*主体背景*/
+  .monitor_main {
+    min-height: 540px;
+    height: 87vh;
+    min-width: 1159px;
+    background-color: #f6f7ff
+  }
+
+  .monitor_main p {
+    display: inline-block;
+    color: #444;
+    font-size: 12px;
+    margin-top: 3vh;
+    margin-left: 18px;
+  }
+
+  /*上半部分*/
+  .monitor_msg >>> .el-input__inner {
+    height: 36px;
+  }
+
+  .monitor_msg >>> .el-input {
+    padding-top: 4px;
+  }
+
+  .monitor_msg {
+    min-height: 110px;
+    height: 10vh;
+    padding-top: 3vh;
+    margin: 2vh 18px 0;
+    background-color: #fff;
+    box-shadow: 0 0 8px 3px rgba(0, 0, 0, 0.1);
+  }
+
+  .monitor_msg i {
+    display: inline-block;
+    /*margin-left: 42px;*/
+  }
+
+  .monitor_msg .demonstration {
+    margin-left: 11px;
+  }
+
+  .monitor_msg .three {
+    margin-top: 22px;
+  }
+
+  .monitor_msg .four {
+    margin-top: 22px;
+  }
+
+  .monitor_msg .five {
+    margin-left: 25px;
+    margin-top: 22px;
+  }
+
+  /*弹窗的输入框样式*/
+  .diaBox .search {
+    float: left;
+    width: 270px;
+    margin: -2px 0 16px 14px;
+  }
+
+  /*input的placeholder样式*/
+  input::-webkit-input-placeholder {
+    color: #aab2bd;
+    font-size: 14px;
+  }
+
+  /*日期选择的部分*/
+  .monitor_msg >>> .el-range-separator {
+    line-height: 28px !important;
+  }
+
+  /*选择系统的部分*/
+  .monitor_msg .system {
+    width: 182px;
+    height: 32px;
+    padding-right: 20px;
+    border: 1px solid #DCDFE6;
+    border-radius: 4px;
+    font-size: 14px;
+    color: #606266;
+    padding-left: 13px;
+    background-color: #fff;
+    cursor: pointer;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis
+  }
+
+  .monitor_msg .el-icon-circle-close {
+    margin-left: -28px !important;
+    font-size: 16px;
+    color: #C0C4CC;
+    z-index: 3;
+    display: inline-block;
+    cursor: pointer;
+  }
+
+  /*选择系统的弹窗样式*/
+  .monitor_msg >>> .el-dialog__header {
+    height: 30px;
+    background-color: #66bded;
+    padding: 7px 20px 0 !important;
+  }
+
+  .monitor_msg >>> .el-dialog__title {
+    color: #fff;
+    font-size: 14px;
+  }
+
+  .monitor_msg >>> .el-dialog__headerbtn {
+    top: 12px !important;
+  }
+
+  .monitor_msg >>> .el-dialog--center .el-dialog__body {
+    padding-top: 15px;
+  }
+
+  .monitor_msg >>> .el-dialog__footer {
+    padding-top: 0;
+  }
+
+  .monitor_msg >>> .el-dialog__headerbtn .el-dialog__close {
+    color: #fff;
+  }
+
+  /*选择系统的弹窗表格*/
+  .el-dialog__wrapper {
+    top: -65px;
+  }
+
+  .diaBox .el-table >>> .cell {
+    text-align: center;
+    line-height: 16px;
+  }
+
+  .monitor_msg >>> .el-table td, .el-table th {
+    padding: 1px 0 !important;
+  }
+
+  .diaBox >>> .el-input__inner {
+    height: 30px;
+  }
+
+  .monitor_msg >>> .el-input__suffix {
+    top: 4px;
+  }
+
+  /*使选择器的文字在ie上下居中*/
+  .monitor_msg >>> .el-input__inner {
+    line-height: 29px !important;
+  }
+
+  /*下半部分*/
+  .monitor_echarts {
+    min-height: 310px;
+    height: 51vh;
+    min-width: 1060px;
+    margin: 4vh 18px 0;
+    background-color: #fff;
+    box-shadow: 0 0 8px 3px rgba(0, 0, 0, 0.1);
+  }
+
+  .monitor_echarts >>> .tableHead .cell {
+    font-weight: bold;
+  }
+
+  .monitor_echarts >>> .cell {
+    line-height: 16px !important;
+  }
+
+  /*上半部分日期选择器的框*/
+  .el-date-editor--daterange.el-input, .el-date-editor--daterange.el-input__inner, .el-date-editor--timerange.el-input, .el-date-editor--timerange.el-input__inner {
+    width: 230px;
+  }
+
+  .monitor_msg >>> .el-date-editor .el-range__icon {
+    line-height: 29px !important;
+  }
+</style>

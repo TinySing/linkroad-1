@@ -1,0 +1,1111 @@
+<template>
+  <!--主体背景部分-->
+  <div class="person_main">
+    <i>当前位置：人员管理</i>
+    <!--上半部分-->
+    <div class="top_area">
+      <!--搜索框部分-->
+      <el-input @input="change($event)" v-model="searchData" class="search" type="text" placeholder="姓名/用户名"></el-input>
+      <div class="but">
+        <button @click="searchBut">查询</button>
+        <button @click="reset" style="margin-left: 15px!important;">重置</button>
+      </div>
+      <!--选择器插件-->
+      <el-select @change="changeCode(valueOne)" v-model="valueOne" filterable :placeholder="valueOne" size="small"
+                 style="float: right;width:105px;margin-top: 2.5vh;margin-right:28px;">
+        <el-option
+          v-for="item in options"
+          :key="item.valueOne"
+          :label="item.label"
+          :value="item.valueOne">
+        </el-option>
+      </el-select>
+    </div>
+    <!--下半部分-->
+    <div class="bottom_area" style="padding:3vh 15px 0">
+      <!--表格插件-->
+      <!--<div class="main-content">-->
+      <el-table :header-cell-style="{background:'#f0f5f9',color:'#666',borderRight:'none'}"
+                :data="tableData"
+                border
+                height="80%"
+                style="width:100%;display:block;font-size:12px;max-height: 51vh;overflow: auto"
+      >
+        <!--:stripe="false"-->
+        <!--prop="infor"-->
+        <el-table-column
+          prop="people"
+          label="人员信息"
+          align="center">
+          <template slot-scope="scope">
+            <p>{{scope.row.name}}</p>
+            <p>{{scope.row.sigUpDescr}} {{scope.row.descr}}</p>
+            <p>{{scope.row.descrShort}}</p>
+          </template>
+        </el-table-column>
+        <el-table-column
+          prop="name"
+          label="责任系统"
+          align="center">
+          <template slot-scope="scope">
+            <div @click="centerDialogOne=true">
+              <el-button @click="duty(scope.$index,tableData)" type="text" size="small">
+                查看相关责任系统
+              </el-button>
+            </div>
+            <!--弹窗部分-->
+            <el-dialog
+              title="责任系统"
+              :close-on-click-modal="false"
+              :visible.sync="centerDialogOne"
+              width="633"
+              center>
+              <div class="dialogBox"
+                   style="padding-bottom: 10px;">
+                <div class="contentText">
+                  <div class="diaBox">
+                    <el-table
+                      :header-cell-style="{background:'#f0f5f9',color:'#666'}"
+                      border
+                      :data="sysListOne.slice((currentPageOne-1)*pageSizeOne,currentPageOne*pageSizeOne)"
+                    >
+                      <!--<el-table-column-->
+                      <!--prop="sysIndex"-->
+                      <!--label="序号"-->
+                      <!--&gt;-->
+                      <!--</el-table-column>-->
+                      <el-table-column
+                        prop="sysCode"
+                        label="系统代码"
+                      >
+                      </el-table-column>
+                      <el-table-column
+                        prop="sysName"
+                        label="系统名称"
+                      >
+                      </el-table-column>
+                      <el-table-column
+                        prop="sysName"
+                        label="操作"
+                      >
+                        <template slot-scope="scope">
+                          <el-button @click="deleteDuty(scope.$index,scope.row,sysListOne,tableData)" type="danger"
+                                     size="mini"
+                                     style="text-decoration:underline;">
+                            删除
+                          </el-button>
+                        </template>
+                      </el-table-column>
+                    </el-table>
+                  </div>
+                </div>
+              </div>
+              <span slot="footer" class="dialog-footer"
+                    style="display:inline-block;width:300px;height:30px;margin-top: 23px;">
+                  <div class="block" style="margin-left: auto;">
+                  <el-pagination
+                    @current-change="handleCurrentChangeOne"
+                    :current-page="currentPageOne"
+                    :page-size="pageSizeOne"
+                    layout="total,prev,pager, next"
+                    :total="totalOne">
+                  </el-pagination>
+                </div>
+          </span>
+            </el-dialog>
+          </template>
+        </el-table-column>
+        <el-table-column
+          prop="name"
+          label="参与系统"
+          align="center">
+          <template slot-scope="scope">
+            <div @click="centerDialogTwo=true">
+              <el-button @click="join(scope.$index,tableData)" type="text" size="small">
+                查看相关参与系统
+              </el-button>
+            </div>
+            <!--弹窗部分-->
+            <el-dialog
+              title="参与系统"
+              :close-on-click-modal="false"
+              :visible.sync="centerDialogTwo"
+              center>
+              <div class="dialogBox"
+                   style="padding-bottom: 10px;">
+                <div class="contentText">
+                  <div class="diaBox">
+                    <el-table
+                      :header-cell-style="{background:'#f0f5f9',color:'#666'}"
+                      border
+                      :data="sysListTwo.slice((currentPageTwo-1)*pageSizeTwo,currentPageTwo*pageSizeTwo)"
+                    >
+                      <!--<el-table-column-->
+                      <!--prop="sysIndex"-->
+                      <!--label="序号"-->
+                      <!--&gt;-->
+                      <!--</el-table-column>-->
+                      <el-table-column
+                        prop="sysCode"
+                        label="系统代码"
+                      >
+                      </el-table-column>
+                      <el-table-column
+                        prop="sysName"
+                        label="系统名称"
+                      >
+                      </el-table-column>
+                      <el-table-column
+                        prop="sysName"
+                        label="操作"
+                      >
+                        <template slot-scope="scope">
+                          <el-button @click="deleteJoin(scope.$index,scope.row,sysListTwo,tableData)" type="danger"
+                                     size="mini"
+                                     style="text-decoration:underline;">
+                            删除
+                          </el-button>
+                        </template>
+                      </el-table-column>
+                    </el-table>
+                  </div>
+                </div>
+              </div>
+              <span slot="footer" class="dialog-footer"
+                    style="display:inline-block;width:300px;height:30px;margin-top: 23px;">
+                 <div class="block" style="margin-left: auto;">
+                  <el-pagination
+                    @current-change="handleCurrentChangeTwo"
+                    :current-page="currentPageTwo"
+                    :page-size="pageSizeTwo"
+                    layout="total,prev,pager, next"
+                    :total="totalTwo">
+                  </el-pagination>
+                </div>
+          </span>
+            </el-dialog>
+          </template>
+        </el-table-column>
+        <el-table-column
+          prop="valid"
+          label="用户有效性"
+          align="center">
+        </el-table-column>
+        <el-table-column
+          prop="address"
+          label="操作责任系统"
+          align="center">
+          <template slot-scope="scope">
+            <el-button @click="dutyUserId(scope.$index,scope.row)" type="text" size="small"
+                       style="text-decoration:underline;">
+              添加
+            </el-button>
+            <!--弹窗部分-->
+            <el-dialog
+              title="责任系统相关人员"
+              :visible.sync="centerDialogThree"
+              :close-on-click-modal="false"
+              center>
+              <div class="dialogBox"
+                   style="padding-bottom: 10px;">
+                <el-transfer
+                  v-model="valueAdd"
+                  filterable
+                  :titles="['全部项目', '待添加项目']"
+                  @right-check-change=''
+                  :button-texts="['取消选择','确定选择']"
+                  :format="{
+        noChecked: '${total}',
+        hasChecked: '${checked}/${total}'
+        }"
+                  @change="handleChange"
+                  :data="dataDuty">
+                  <!--<el-button class="transfer-footer" slot="left-footer" size="small">操作</el-button>-->
+                  <!--<el-button class="transfer-footer" slot="right-footer" size="small" @click="">直接添加，无需再次勾选</el-button>-->
+                </el-transfer>
+              </div>
+              <span slot="footer" class="dialog-footer"
+                    style="display:inline-block;width:300px;height:30px;">
+        <el-button class="btn0" size="small" @click="centerDialogThree=false">取消</el-button>
+        <el-button class="btn1" type="primary" size="small" @click="dutyAdd(scope.$index,tableData)">添加</el-button>
+        </span>
+            </el-dialog>
+            <!--<el-button @click="centerDialogFour = true" type="text" size="small" style="text-decoration:underline;">-->
+            <!--&lt;!&ndash;float: left;margin-top:-23px;margin-left: 2vh&ndash;&gt;-->
+            <!--删除-->
+            <!--</el-button>-->
+            <!--&lt;!&ndash;弹窗部分&ndash;&gt;-->
+            <!--<el-dialog-->
+            <!--title="系统相关人员"-->
+            <!--:visible.sync="centerDialogFour"-->
+            <!--:close-on-click-modal="false"-->
+            <!--center>-->
+            <!--<div class="dialogBox"-->
+            <!--style="padding-bottom: 10px;">-->
+            <!--</div>-->
+            <!--<span slot="footer" class="dialog-footer"-->
+            <!--style="display:inline-block;width:300px;height:30px;">-->
+            <!--<el-button class="btn0" size="small" @click="centerDialogFour = false">取消</el-button>-->
+            <!--<el-button class="btn1" type="primary" size="small" @click="centerDialogFour = false">确定</el-button>-->
+            <!--</span>-->
+            <!--</el-dialog>-->
+          </template>
+        </el-table-column>
+        <el-table-column
+          prop="address"
+          label="操作参与系统"
+          align="center">
+          <template slot-scope="scope">
+            <div style="text-align: center">
+              <el-button @click="joinUserId(scope.$index,scope.row)" type="text" size="small"
+                         style="text-decoration:underline;">
+                添加
+              </el-button>
+              <!--弹窗部分-->
+              <el-dialog
+                title="参与系统相关人员"
+                :visible.sync="centerDialogFive"
+                :close-on-click-modal="false"
+                center>
+                <div class="dialogBox"
+                     style="padding-bottom: 10px;">
+                  <el-transfer
+                    v-model="valueAdd"
+                    filterable
+                    :titles="['全部项目', '待添加项目']"
+                    @right-check-change=''
+                    :button-texts="['取消选择','确定选择']"
+                    :format="{
+                     noChecked: '${total}',
+                     hasChecked: '${checked}/${total}'
+                      }"
+                    @change="handleChange"
+                    :data="dataJoin">
+                    <!--<el-button class="transfer-footer" slot="left-footer" size="small">操作</el-button>-->
+                    <!--<el-button class="transfer-footer" slot="right-footer" size="small" @click="joinAdd">直接添加，无需再次勾选</el-button>-->
+                  </el-transfer>
+                </div>
+                <span slot="footer" class="dialog-footer"
+                      style="display:inline-block;width:300px;height:30px;">
+                  <el-button class="btn0" size="small" @click="centerDialogFive=false">取消</el-button>
+                  <el-button class="btn1" type="primary" size="small"
+                             @click="joinAdd(scope.$index,tableData)">添加</el-button>
+          </span>
+              </el-dialog>
+              <!--<el-button @click="centerDialogSix = true" type="text" size="small" style="text-decoration:underline;">-->
+              <!--删除-->
+              <!--</el-button>-->
+              <!--&lt;!&ndash;弹窗部分&ndash;&gt;-->
+              <!--<el-dialog-->
+              <!--title="系统相关人员"-->
+              <!--:visible.sync="centerDialogSix"-->
+              <!--:close-on-click-modal="false"-->
+              <!--center>-->
+              <!--<div class="dialogBox"-->
+              <!--style="padding-bottom: 10px;">-->
+              <!--</div>-->
+              <!--<span slot="footer" class="dialog-footer"-->
+              <!--style="display:inline-block;width:300px;height:30px;">-->
+              <!--<el-button class="btn0" size="small" @click="centerDialogSix = false">取消</el-button>-->
+              <!--<el-button class="btn1" type="primary" size="small" @click="centerDialogSix = false">确定</el-button>-->
+              <!--</span>-->
+              <!--</el-dialog>-->
+            </div>
+          </template>
+        </el-table-column>
+      </el-table>
+      <!--分页插件-->
+      <!--width:600px;height: 6vh;position: absolute;bottom: 4vh;left:40vw;-->
+      <div class="block" style="width:600px;height: 6vh;margin-top: 3vh;left:40vw;">
+        <!--v-if="pageshow"-->
+        <el-pagination
+          background
+          @size-change="handleSizeChange"
+          @current-change="handleCurrentChange"
+          :current-page="currentPage"
+          :page-sizes="pageSizes"
+          :page-size="pageSize"
+          layout="total,sizes,prev, pager, next, jumper"
+          :total="total">
+        </el-pagination>
+      </div>
+      <!--</div>-->
+    </div>
+  </div>
+
+</template>
+
+<script>
+  export default {
+    name: "ToolCom",
+
+    data() {
+      const generateJoin = _ => {
+        let dataJoin = [];
+        // let qs = require('qs');
+        // let information = {"userId": sessionStorage.getItem("userId"), "part": "2"};
+        this.$axios.post('/monitorCon/system/project/query').then((response) => {
+          // console.log(response)
+          for (let i = 0; i < response.data.length; i++) {
+            dataJoin.push({
+              key: i,
+              label: response.data[i]['projectid'] + ` ` + response.data[i]['projectname']
+            });
+          }
+        });
+        return dataJoin;
+      };
+      const generateDuty = _ => {
+        let dataDuty = [];
+        // let qs = require('qs');
+        // let information = {"userId": sessionStorage.getItem("userId"), "part": "2"};
+        // , qs.stringify(information)
+        this.$axios.post('/monitorCon/system/project/query').then((response) => {
+          for (let i = 0; i < response.data.length; i++) {
+            dataDuty.push({
+              key: i,
+              label: response.data[i]['projectid'] + ` ` + response.data[i]['projectname']
+            });
+          }
+        });
+        return dataDuty;
+      };
+      return {
+        dataJoin: generateJoin(),
+        dataDuty: generateDuty(),
+        valueAdd: [],
+        joinAddValue: [],
+        dutyAddValue: [],
+        checkboxGroup: [],
+        total: null,
+        currentPage: 1,
+        pageSize: 5,
+        pageSizes: [5, 10, 15, 20],
+        totalOne: null,
+        totalTwo: null,
+        pageSizeOne: 6,
+        pageSizeTwo: 6,
+        currentPageOne: 1,
+        currentPageTwo: 1,
+        centerDialogOne: false,
+        centerDialogTwo: false,
+        centerDialogThree: false,
+        centerDialogFour: false,
+        centerDialogFive: false,
+        centerDialogSix: false,
+        value: '',
+        valueOne: '全部',
+        value2: '项目A',
+        value3: '项目B',
+        searchData: '',
+        options: [
+          {
+            valueOne: '',
+            label: '全部'
+          },
+          {
+            valueOne: 'JT',
+            label: '集团'
+          },
+          {
+            valueOne: 'SX',
+            label: '寿险'
+          },
+          {
+            valueOne: 'CX',
+            label: '产险'
+          }
+        ],
+        personList: [
+          {
+            name: '张老师1',
+            department: '科技中心 应用开发部门',
+            class: '应用规划室',
+          },
+          {
+            name: '张老师2',
+            department: '科技中心 应用开发部门',
+            class: '应用规划室',
+          },
+          {
+            name: '张老师3',
+            department: '科技中心 应用开发部门',
+            class: '应用规划室',
+          },
+          {
+            name: '张老师4',
+            department: '科技中心 应用开发部门',
+            class: '应用规划室',
+          },
+          {
+            name: '张老师5',
+            department: '科技中心 应用开发部门',
+            class: '应用规划室',
+          },
+          {
+            name: '张老师6',
+            department: '科技中心 应用开发部门',
+            class: '应用规划室',
+          },
+          {
+            name: '张老师7',
+            department: '科技中心 应用开发部门',
+            class: '应用规划室',
+          }
+        ],
+        tableData: [],
+        // tableData: [
+        //   {
+        //     name: '张老师1',
+        //     department: '科技中心 应用开发部门',
+        //     room: '应用规划室',
+        //     infor: '科技研发开发部科技研发开发部科技研发开发部科技研发开发部科技研发开发部',
+        //     address: '正常'
+        //   },
+        //   {
+        //     name: '张老师2',
+        //     department: '科技中心 应用开发部门',
+        //     room: '应用规划室',
+        //     infor: '科技研发开发部',
+        //     address: '正常'
+        //   },
+        //   {
+        //     name: '张老师3',
+        //     department: '科技中心 应用开发部门',
+        //     room: '应用规划室',
+        //     infor: '科技研发开发部科技研发开发部科技研发开发部科技研发开发部科技研发开发部',
+        //     address: '停用'
+        //   },
+        //   {
+        //     name: '张老师4',
+        //     department: '科技中心 应用开发部门',
+        //     room: '应用规划室',
+        //     infor: '科技研发开发部科技研发开发部科技研发开发部科技研发开发部科技研发开发部',
+        //     address: '停用'
+        //   },
+        //   {
+        //     name: '张老师5',
+        //     department: '科技中心 应用开发部门',
+        //     room: '应用规划室',
+        //     infor: '科技研发开发部科技研发开发部科技研发开发部科技研发开发部科技研发开发部',
+        //     address: '正常'
+        //   },
+        //   {
+        //     name: '张老师6',
+        //     department: '科技中心 应用开发部门',
+        //     room: '应用规划室',
+        //     infor: '科技研发开发部科技研发开发部科技研发开发部科技研发开发部科技研发开发部',
+        //     address: '正常'
+        //   },
+        //   {
+        //     name: '张老师7',
+        //     department: '科技中心 应用开发部门',
+        //     room: '应用规划室',
+        //     infor: '科技研发开发部科技研发开发部',
+        //     address: '正常'
+        //   },
+        //   {
+        //     name: '张老师8',
+        //     department: '科技中心 应用开发部门',
+        //     room: '应用规划室',
+        //     infor: '科技研发开发部科',
+        //     address: '正常'
+        //   },
+        //   {
+        //     name: '张老师9',
+        //     department: '科技中心 应用开发部门',
+        //     room: '应用规划室',
+        //     infor: '科技研发开发部科技研发开发部科技研发开发部科技研发开发部科技研发开发部',
+        //     address: '正常'
+        //   }
+        // ],
+        options2: [
+          {
+            value2: '选项1',
+            label: '项目A'
+          }, {
+            value2: '选项2',
+            label: '项目B'
+          }, {
+            value2: '选项3',
+            label: '项目C'
+          }, {
+            value2: '选项4',
+            label: '项目D'
+          }],
+        options3: [
+          {
+            value3: '选项1',
+            label: '项目B'
+          }, {
+            value3: '选项2',
+            label: '项目E'
+          }, {
+            value3: '选项3',
+            label: '项目F'
+          }, {
+            value3: '选项4',
+            label: '项目G'
+          }],
+        sysListOne: [],
+        sysListTwo: [],
+        indexText: [],
+        important: '',
+        delDutyArr: []
+      }
+    },
+    methods: {
+      deleteDuty(index, row, sysListOne, tableData) {
+        sysListOne.splice(index, 1);
+        this.totalOne = sysListOne.length
+        this.deluserId = tableData[this.important].userId;
+        let qs = require('qs');
+        let information = {"userId": this.deluserId, "projectId": row.sysCode, "part": "2"};
+        // console.log(information)
+        this.$axios.post('/monitorCon/system/userProject/delete', qs.stringify(information)).then((response) => {
+          // console.log(response)
+        });
+      },
+      deleteJoin(index, row, sysListTwo, tableData) {
+        sysListTwo.splice(index, 1);
+        this.totalTwo = sysListTwo.length
+        this.deluserId = tableData[this.important].userId;
+        let qs = require('qs');
+        let information = {"userId": this.deluserId, "projectId": row.sysCode, "part": "1"};
+        // console.log(information)
+        this.$axios.post('/monitorCon/system/userProject/delete', qs.stringify(information)).then((response) => {
+          // console.log(response)
+        });
+      },
+      //获取对应人员的参与系统
+      join(index, tableData) {
+        this.important = index
+        this.userId = tableData[index].userId;
+        // console.log(this.userId)
+        let qs = require('qs');
+        let information = {"userId": this.userId, "part": "1"};
+        this.$axios.post('/monitorCon/system/project/queryByUser', qs.stringify(information)).then((response) => {
+          // console.log(response)
+          // this.sysListOne = []
+          this.sysListTwo = []
+          for (let i = 0; i < response.data.length; i++) {
+            this.sysListTwo.push({
+              'sysIndex': i + 1,
+              'sysCode': response.data[i]['projectid'],
+              'sysName': response.data[i]['projectname']
+            });
+          }
+          // console.log(this.sysListTwo)
+          this.totalTwo = this.sysListTwo.length
+        });
+      }
+      ,
+      //获取对应人员的责任系统
+      duty(index, tableData) {
+        this.important = index
+        this.userId = tableData[index].userId;
+        // console.log(this.userId)
+        let qs = require('qs');
+        let information = {"userId": this.userId, "part": "2"};
+        this.$axios.post('/monitorCon/system/project/queryByUser', qs.stringify(information)).then((response) => {
+          this.sysListOne = []
+          for (let i = 0; i < response.data.length; i++) {
+            this.sysListOne.push({
+              // 'sysIndex': i + 1,
+              'sysCode': response.data[i]['projectid'],
+              'sysName': response.data[i]['projectname']
+            });
+          }
+          // console.log(this.sysListOne)
+          this.totalOne = this.sysListOne.length
+        });
+      }
+      ,
+      joinUserId(index, row) {
+        this.centerDialogFive = true
+        this.important = index
+      },
+      dutyUserId(index, row) {
+        this.centerDialogThree = true
+        this.important = index
+      },
+      joinAdd(index, tableData) {
+        this.adduserId = tableData[this.important].userId;
+        for (let i = 0; i < this.valueAdd.length; i++) {
+          this.joinAddValue.push({
+            'sysCode': this.dataJoin[this.valueAdd[i]].label.split(" ")[0],
+            'sysName': this.dataJoin[this.valueAdd[i]].label.split(" ")[1]
+          })
+          let qs = require('qs');
+          let information = {"userId": this.adduserId, "projectId": this.joinAddValue[i].sysCode, "part": "1",};
+          // console.log(information)
+          this.$axios.post('/monitorCon/system/userProject/add', qs.stringify(information)).then((response) => {
+            // console.log(response.data.message)
+          });
+        }
+        this.centerDialogFive = false
+        this.valueAdd = []
+      },
+      dutyAdd(index, tableData) {
+        this.adduserId = tableData[this.important].userId;
+        for (let i = 0; i < this.valueAdd.length; i++) {
+          this.dutyAddValue.push({
+            'sysCode': this.dataDuty[this.valueAdd[i]].label.split(" ")[0],
+            'sysName': this.dataDuty[this.valueAdd[i]].label.split(" ")[1]
+          })
+          let qs = require('qs');
+          let information = {"userId": this.adduserId, "projectId": this.dutyAddValue[i].sysCode, "part": "2",};
+          // console.log(information)
+          this.$axios.post('/monitorCon/system/userProject/add', qs.stringify(information)).then((response) => {
+            // console.log(response)
+          });
+        }
+        this.centerDialogThree = false
+        this.valueAdd = []
+      },
+      changeCode(valueOne) {
+        let qs = require('qs');
+        let information = {"companyCode": this.valueOne};
+        this.$axios.post('/monitorCon/system/user/query', qs.stringify(information)).then((response) => {
+          // console.log(response)
+          this.tableData = []
+          for (let i = 0; i < response.data.length; i++) {
+            if (response.data[i]['enable'] === 'Y') {
+              response.data[i]['enable'] = '正常'
+            } else {
+              response.data[i]['enable'] = '停用'
+            }
+            if (response.data[i]['deptInfo'] === null) {
+              this.tableData.push({
+                'userId': response.data[i]['userId'],
+                'name': response.data[i]['userName'],
+                'valid': response.data[i]['enable']
+              })
+            } else {
+              this.tableData.push({
+                'userId': response.data[i]['userId'],
+                'name': response.data[i]['userName'],
+                'valid': response.data[i]['enable'],
+                'descr': response.data[i]['deptInfo'].descr,
+                'descrShort': response.data[i]['deptInfo'].descrShort,
+                'sigUpDescr': response.data[i]['deptInfo'].sigUpDescr,
+              });
+            }
+          }
+          this.total = this.tableData.length
+        });
+      },
+      // search() {
+      //   this.page = 1
+      //   this.pageshow = false
+      //   this.getList()
+      //   this.$nextTick(() => {
+      //     this.pageshow = true
+      //   })
+      // },
+      //重置按钮的方法
+      reset() {
+        this.valueOne = '全部'
+        //重置后输入框清空
+        this.searchData = ""
+        this.$axios.post('/monitorCon/system/user/query').then((response) => {
+          this.tableData = []
+          for (let i = 0; i < response.data.length; i++) {
+            if (response.data[i]['enable'] === 'Y') {
+              response.data[i]['enable'] = '正常'
+            } else {
+              response.data[i]['enable'] = '停用'
+            }
+            if (response.data[i]['deptInfo'] === null) {
+              this.tableData.push({
+                'userId': response.data[i]['userId'],
+                'name': response.data[i]['userName'],
+                'valid': response.data[i]['enable']
+              })
+            } else {
+              this.tableData.push({
+                'userId': response.data[i]['userId'],
+                'name': response.data[i]['userName'],
+                'valid': response.data[i]['enable'],
+                'descr': response.data[i]['deptInfo'].descr,
+                'descrShort': response.data[i]['deptInfo'].descrShort,
+                'sigUpDescr': response.data[i]['deptInfo'].sigUpDescr,
+              });
+            }
+          }
+          this.total = this.tableData.length
+        });
+      },
+      //查询按钮的方法
+      searchBut() {
+        this.currentPage = 1
+        this.$axios.post('/monitorCon/system/user/query').then((response) => {
+          this.total = this.tableData.length
+          this.data = this.tableData
+          this.searchList()
+        });
+        if (this.searchData === "") {
+          alert('系统不能为空，请重新输入')
+        }
+      },
+      // es6过滤得到满足搜索条件的展示数据
+      searchList() {
+        let tableDataSea = this.data.filter((item) =>
+          item.userId.includes(this.searchData) || item.name.includes(this.searchData)
+        )
+        this.tableData = tableDataSea.filter((item, index) =>
+          index < this.currentPage * this.pageSize && index >= this.pageSize * (this.currentPage - 1)
+        )
+        this.total = this.tableData.length
+      },
+      //获取所有人员的信息
+      getPerson() {
+        let qs = require('qs');
+        let information = {"pageNum": this.currentPage, "pageSize": this.pageSize};
+        console.log(information)
+        // {data:information},
+        // {
+        //   headers: {
+        //     'Content-Type':'applicaiton/json'
+        //   }
+        // }
+        this.$axios.post('/monitorCon/system/user/query', qs.stringify(information)).then((response) => {
+          this.total = response.data.total
+          this.tableData = []
+          console.log(this.total)
+          console.log(response)
+          for (let i = 0; i < response.data.list.length; i++) {
+            if (response.data.list[i]['enable'] === 'Y') {
+              response.data.list[i]['enable'] = '正常'
+            } else {
+              response.data.list[i]['enable'] = '停用'
+            }
+            if (response.data.list[i]['deptInfo'] === null) {
+              this.tableData.push({
+                'userId': response.data.list[i]['userId'],
+                'name': response.data.list[i]['userName'],
+                'valid': response.data.list[i]['enable']
+              })
+            }
+            if (response.data.list[i]['deptInfo'] != null) {
+              this.tableData.push({
+                'userId': response.data.list[i]['userId'],
+                'name': response.data.list[i]['userName'],
+                'valid': response.data.list[i]['enable'],
+                'descr': response.data.list[i]['deptInfo'].descr,
+                'descrShort': response.data.list[i]['deptInfo'].descrShort,
+                'sigUpDescr': response.data.list[i]['deptInfo'].sigUpDescr,
+              });
+            }
+          }
+          console.log(this.tableData)
+          // this.total = this.tableData.length
+        });
+      }
+      ,
+      change(e) {
+        this.$forceUpdate()
+      }
+      ,
+      changeOne(e) {
+        this.$forceUpdate()
+      }
+      ,
+      handleSizeChange(val) {
+        this.pageSize = val;
+        this.currentPage = 1;
+        this.getPerson()
+      }
+      ,
+      handleCurrentChange(val) {
+        this.currentPage = val;
+        console.log(this.currentPage)
+        this.getPerson()
+      }
+      ,
+      handleCurrentChangeOne(val) {
+        this.currentPageOne = val;
+      }
+      ,
+      handleCurrentChangeTwo(val) {
+        this.currentPageTwo = val;
+      },
+      handleChange(valueAdd, direction, movedKeys) {
+        // console.log(valueAdd, direction, movedKeys);
+      }
+    },
+    computed: {
+      // 模糊搜索
+      // tables() {
+      //   const search = this.search
+      //   if (search) {
+      //     return this.tableData.filter(data => {
+      //       return Object.keys(data).some(key => {
+      //         return String(data[key]).toLowerCase().indexOf(search) > -1
+      //       })
+      //     })
+      //   }
+      //   // return this.tableData
+      //   return this.tableData.slice((this.currentPage - 1) * this.pageSize,
+      //     this.currentPage * this.pageSize)
+      // }
+    }
+    ,
+    created() {
+      // if(this.centerDialogOne===false){
+      //   this.sysList=''
+      //   console.log(this.sysList)
+      // }
+      this.total = this.tableData.length
+    }
+    ,
+    mounted() {
+      this.getPerson()
+
+      // console.log(this.$route.params.idOne)
+    }
+    ,
+  }
+</script>
+
+<style scoped>
+  /*去掉el-table的多余横线*/
+  .el-table::before {
+    z-index: inherit;
+    height: 0px !important;
+  }
+
+  .bottom_area >>> .el-table--striped .el-table__body tr {
+    /*background-color: #f0f5f9 !important; */
+    /*替换为你需要的颜色，觉得优先级不够就加!important*/
+  }
+
+  /*弹窗样式*/
+  .dialogBox {
+    min-width: 500px;
+    /*max-width: 631px;*/
+    background: #fff;
+  }
+
+  .dialogBox .el-table >>> .cell {
+    text-align: center;
+  }
+
+  .bottom_area >>> .el-dialog__header {
+    height: 36px;
+    background-color: #66bded;
+    padding: 7px 20px 0 !important;
+  }
+
+  .bottom_area >>> .el-dialog--center .el-dialog__body {
+    padding: 13px 16px 0 16px !important;
+    min-height: 120px;
+  }
+
+  .bottom_area >>> .el-dialog__footer {
+    padding-top: 0;
+  }
+
+  .bottom_area >>> .el-dialog__title {
+    height: 26px;
+    width: 631px;
+    background-color: #66bded;
+    font-size: 14px;
+    padding-top: 9px;
+    color: #fff;
+    text-align: center;
+    margin-bottom: 10px;
+  }
+
+  .bottom_area >>> .el-dialog__headerbtn {
+    top: 12px !important;
+  }
+
+  .bottom_area >>> .btn0, .bottom_area >>> .btn1 {
+    display: inline-block;
+    color: #66bded;
+    cursor: pointer;
+    background-color: #fff;
+    border: 1px solid #a3d7f4;
+    box-shadow: 0 2px 5px 2px rgba(145, 208, 243, 0.3);
+    width: 95px;
+    height: 30px;
+    font-weight: bold;
+  }
+
+  .bottom_area >>> .btn1 {
+    margin-left: 52px;
+    color: #fff !important;
+    background-color: #66bded;
+  }
+
+  /*.bottom_area .dialogBox .border {*/
+  /*width: 25vw;*/
+  /*height: 73px;*/
+  /*border: 1px solid #e7e7e7;*/
+  /*float: left;*/
+  /*!*margin-top: 13px;*!*/
+  /*margin-right: 10px;*/
+  /*}*/
+
+  .dialogBox p {
+    font-size: 12px;
+    color: #666;
+    text-align: left;
+    float: left;
+    margin-top: 16px;
+  }
+
+  /*.dialogBox .add {*/
+  /*width: 80px;*/
+  /*height: 30px;*/
+  /*background-color: #fff;*/
+  /*display: inline-block;*/
+  /*float: right;*/
+  /*color: #66bded;*/
+  /*margin-top: 13px;*/
+  /*font-weight: bold;*/
+  /*border: 1px solid #a3d7f4;*/
+  /*border-radius: 5px;*/
+  /*box-shadow: 0 2px 5px 2px rgba(145, 208, 243, 0.3);*/
+  /*cursor: pointer;*/
+  /*}*/
+
+  /*主体背景部分*/
+  .person_main {
+    height: 87vh;
+    min-width: 1159px;
+    background-color: #f6f7ff
+  }
+
+  .person_main i {
+    display: inline-block;
+    color: #444;
+    font-size: 12px;
+    margin-top: 17px;
+    margin-left: 18px;
+  }
+
+  /*上半部分*/
+  .top_area {
+    margin: 11px 18px 0;
+    height: 9vh;
+    min-width: 1060px;
+    background-color: #fff;
+    box-shadow: 0 0 8px 3px rgba(0, 0, 0, 0.1);
+  }
+
+  /*搜索框*/
+  .top_area .search {
+    float: left;
+    width: 270px;
+    height: 20px;
+    margin-left: 24px;
+    margin-top: 2.5vh;
+  }
+
+  .top_area >>> .el-input__inner {
+    height: 28px;
+  }
+
+  .top_area >>> .el-select .el-input .el-select__caret {
+    line-height: 12px;
+  }
+
+  .top_area .but {
+    float: left;
+    display: inline-block;
+    margin-top: 2.5vh;
+  }
+
+  .top_area .but button {
+    width: 72px;
+    height: 27px;
+    margin-left: 20px;
+    border: none;
+    background-color: #43abe9;
+    border-radius: 5px;
+    color: #fff;
+    box-shadow: 0 2px 5px 2px rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+  }
+
+  /*下半部分*/
+  .bottom_area {
+    height: 63vh;
+    min-width: 1060px;
+    background-color: #fff;
+    box-shadow: 0 0 8px 3px rgba(0, 0, 0, 0.1);
+    margin: 17px 18px 0;
+  }
+
+  .bottom_area >>> .tableHead {
+    font-size: 14px;
+    font-family: '黑体';
+  }
+
+  .bottom_area >>> .el-input--small .el-input__inner {
+    height: 30px;
+    line-height: 28px;
+  }
+
+  .bottom_area >>> .el-dialog__headerbtn {
+    top: 10px !important;
+  }
+
+  .bottom_area >>> .el-dialog__headerbtn .el-dialog__close {
+    color: #fff;
+  }
+
+  .bottom_area >>> .el-table td, .el-table th {
+    padding: 4px 0 !important;
+  }
+
+  .bottom_area >>> .el-table .cell {
+    line-height: 20px !important;
+  }
+
+  .bottom_area .searchJoin >>> .el-input__inner {
+    float: left;
+    width: 260px;
+    height: 28px;
+    margin-left: 15px;
+  }
+
+  .bottom_area .el-table >>> .el-input {
+    display: block;
+  }
+
+  .bottom_area .dialog_main {
+    display: inline-block;
+    margin-top: 20px;
+    width: 633px;
+    height: 300px;
+    border: 1px #666 solid;
+  }
+
+  .bottom_area .dialog_result {
+    display: inline-block;
+    margin-top: 20px;
+    width: 633px;
+    height: 100px;
+    border: 1px #666 solid;
+  }
+
+  /*穿梭框的宽度*/
+  .bottom_area >>> .el-transfer-panel {
+    width: 37vh;
+  }
+
+  .bottom_area >>> .el-transfer__buttons {
+    padding: 0 3vh !important;
+  }
+
+  .bottom_area >>> .el-dialog {
+    width: 100vh !important;
+  }
+
+  .bottom_area >>> .el-table__header {
+    background-color: #f0f5f9;
+  }
+</style>

@@ -1,0 +1,509 @@
+<template>
+  <!--主体背景部分-->
+  <div class="system_main">
+    <i>当前位置：系统管理</i>
+    <!--上半部分-->
+    <div class="top_area">
+      <!--搜索框-->
+      <el-input @input="change($event)" class="search" type="text" placeholder="姓名/工号/手机号"></el-input>
+      <el-select v-model="value1" filterable :placeholder="value1" size="small"
+                 style="float:left;width:80px;margin-top: 15px;margin-left:10px;">
+        <el-option
+          v-for="item in options1"
+          :key="item.value1"
+          :label="item.label"
+          :value="item.value1">
+        </el-option>
+      </el-select>
+      <div class="but">
+        <button>查询</button>
+      </div>
+
+      <!--选择器插件-->
+      <el-select v-model="value" filterable :placeholder="value" size="small"
+                 style="float: right;width:105px;margin-top: 15px;margin-right:28px;">
+        <el-option
+          v-for="item in options"
+          :key="item.value"
+          :label="item.label"
+          :value="item.value">
+        </el-option>
+      </el-select>
+    </div>
+    <!--下半部分-->
+    <div class="bottom_area">
+      <!--表格插件-->
+      <div class="main-content">
+        <el-table :header-cell-style="{background:'#f0f5f9',color:'#666'}"
+                  :data="tableData.slice((currentPage-1)*pageSize,currentPage*pageSize)"
+                  border
+                  style="max-height: 51vh;overflow: auto;width: 1081px !important;;font-size: 12px;position: absolute; margin-left: 18px;margin-top: 22px;"
+                  header-row-class-name="tableHead"
+        >
+          <el-table-column
+            prop="describe"
+            label="系统描述"
+            align="center"
+            width="240">
+          </el-table-column>
+          <el-table-column
+            prop="name"
+            label="系统负责人"
+            align="center"
+            width="240">
+          </el-table-column>
+          <el-table-column
+            prop="join"
+            label="系统参与人"
+            align="center"
+            width="200">
+          </el-table-column>
+          <el-table-column
+            prop="man"
+            label="关联设备情况"
+            align="center"
+            width="140">
+            <template slot-scope="scope">
+              <!--点击查看出弹窗-->
+              <el-button @click="centerDialog = true" type="text" size="small">
+                查看
+              </el-button>
+              <!--弹窗部分-->
+              <el-dialog
+                title="系统相关设备"
+                :close-on-click-modal="false"
+                :visible.sync="centerDialog"
+                width="633"
+                center>
+                <div class="diaBox"
+                     style="margin-top: 25px;padding-bottom: 15px;">
+                  <!--表格部分-->
+                  <el-table
+                    :header-cell-style="{background:'#f0f5f9',color:'#666',height:'28px'}"
+                    :data="tableDataOne"
+                    border
+                    style="width:580px!important;margin-left:30px;margin-top:16px;">
+                    <el-table-column
+                      prop="number"
+                      label="序号"
+                      width="50">
+                    </el-table-column>
+                    <el-table-column
+                      prop="type"
+                      label="设备类型"
+                      width="180">
+                    </el-table-column>
+                    <el-table-column
+                      prop="ip"
+                      label="设备IP"
+                      width="120">
+                    </el-table-column>
+                    <el-table-column
+                      prop="network"
+                      label="所处网段"
+                      width="120">
+                    </el-table-column>
+                    <el-table-column
+                      prop="environment"
+                      label="所处环境"
+                      width="108">
+                    </el-table-column>
+                  </el-table>
+                </div>
+                <span slot="footer" class="dialog-footer">
+          <el-button type="primary" size="small" @click="centerDialog = false">关闭</el-button>
+          </span>
+              </el-dialog>
+            </template>
+          </el-table-column>
+          <el-table-column
+            prop="validity"
+            label="系统有效性"
+            align="center"
+            width="140">
+          </el-table-column>
+          <el-table-column
+            prop="address"
+            label="操作"
+            align="center"
+            width="120">
+            <template slot-scope="scope">
+              <!--点击操作出弹窗-->
+              <el-button @click="centerDialog1 = true" type="text" size="small" style="text-decoration: underline">
+                操作
+              </el-button>
+              <!--弹窗部分-->
+              <el-dialog
+                title="系统相关人员"
+                :visible.sync="centerDialog1"
+                width="633"
+                center>
+                <div class="diaBox"
+                     style="margin-top: 10px;padding-bottom: 10px;">
+                  <p class="eqiIp">添加人员:</p>
+                  <input type="text" style="width: 350px">
+                  <button class="search">搜索</button>
+                  <button class="add">添加</button>
+                  <input type="text" style="width:520px;height:40px;margin-left: 83px;">
+                  <input type="text" style="width:520px;height:60px;margin-left: 83px;">
+                </div>
+                <span slot="footer" class="dialog-footer"
+                      style="display:inline-block;width:300px;height:30px;margin-top: 15px;">
+          <el-button class="btn0" size="small" @click="centerDialog1 = false">取消</el-button>
+          <el-button class="btn1" type="primary" size="small" @click="centerDialog1 = false">确定</el-button>
+
+          </span>
+              </el-dialog>
+            </template>
+          </el-table-column>
+        </el-table>
+        <!--分页插件-->
+        <div class="block" style="width:600px;height: 6vh;position: absolute;bottom: 4vh;left:40vw;">
+          <el-pagination
+            background
+            @current-change="handleCurrentChange"
+            :current-page="currentPage"
+            :page-size="pageSize"
+            layout="total, prev, pager, next, jumper"
+            :total="total">
+          </el-pagination>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</template>
+
+<script>
+  export default {
+    name: "SystemMan",
+    data() {
+      return {
+        total: null,
+        currentPage: 1,
+        pageSize: 5,
+        centerDialog: false,
+        centerDialog1: false,
+        value: '默认排序',
+        value1: '全部',
+        options: [
+          {
+            value: '选项1',
+            label: '默认排序'
+          }, {
+            value: '选项2',
+            label: '按姓名'
+          }, {
+            value: '选项3',
+            label: '按工号'
+          }],
+        options1: [
+          {
+            value1: '选项1',
+            label: '全部'
+          }, {
+            value1: '选项2',
+            label: '项目A'
+          }, {
+            value1: '选项3',
+            label: '项目B'
+          }],
+        tableData: [
+          {
+            describe: '负责处事：开发4部负责处事：开发4部负责处事：开发4部负责处事：开发4部负责处事：开发4部',
+            name: '周周周',
+            join: '赵朝朝，王望望，李丽丽',
+            validity: '正常'
+          }, {
+            describe: '负责处事：开发4部',
+            name: '周周周',
+            join: '赵朝朝，王望望，李丽丽',
+            validity: '正常'
+          }, {
+            describe: '负责处事：开发4部',
+            name: '周周周',
+            join: '赵朝朝，王望望，李丽丽',
+            validity: '正常'
+          }, {
+            describe: '负责处事：开发4部',
+            name: '周周周',
+            join: '赵朝朝，王望望，李丽丽',
+            validity: '正常'
+          }, {
+            describe: '负责处事：开发4部',
+            name: '周周周',
+            join: '赵朝朝，王望望，李丽丽',
+            validity: '正常'
+          }, {
+            describe: '负责处事：开发4部负责处事：开发4部负责处事：开发4部负责处事：开发4部负责处事：开发4部',
+            name: '周周周',
+            join: '赵朝朝，王望望，李丽丽',
+            validity: '正常'
+          }, {
+            describe: '负责处事：开发4部负责处事：开发4部负责处事：开发4部负责处事：开发4部负责处事：开发4部',
+            name: '周周周',
+            join: '赵朝朝，王望望，李丽丽',
+            validity: '正常'
+          }, {
+            describe: '负责处事：开发4部负责处事：开发4部负责处事：开发4部负责处事：开发4部负责处事：开发4部',
+            name: '周周周',
+            join: '赵朝朝，王望望，李丽丽',
+            validity: '正常'
+          }],
+        tableDataOne: [
+          {
+            number: '1',
+            type: '虚拟机',
+            ip: '10.9.0.4.95',
+            network: 'APP安全区',
+            environment: '测试'
+          },
+          {
+            number: '1',
+            type: '虚拟机',
+            ip: '10.9.0.4.95',
+            network: 'APP安全区',
+            environment: '测试'
+          },
+          {
+            number: '1',
+            type: '虚拟机',
+            ip: '10.9.0.4.95',
+            network: 'APP安全区',
+            environment: '测试'
+          },
+          {
+            number: '1',
+            type: '虚拟机',
+            ip: '10.9.0.4.95',
+            network: 'APP安全区',
+            environment: '测试'
+          },
+          {
+            number: '1',
+            type: '虚拟机',
+            ip: '10.9.0.4.95',
+            network: 'APP安全区',
+            environment: '测试'
+          },
+          {
+            number: '1',
+            type: '虚拟机',
+            ip: '10.9.0.4.95',
+            network: 'APP安全区',
+            environment: '测试'
+          }
+        ]
+
+      }
+    },
+    created() {
+      this.total = this.tableData.length
+    },
+    methods: {
+      change(e) {
+        this.$forceUpdate()
+      },
+      handleCurrentChange(val) {
+        console.log(`当前页: ${val}`);
+        this.currentPage = val;
+      }
+    }
+  }
+</script>
+
+
+<style scoped>
+
+  .main-content {
+    margin: 0 auto;
+    width: 1140px;
+    min-width: 1060px;
+  }
+
+  /*弹窗弹出的表格样式*/
+  .bottom_area >>> .cell {
+    line-height: 16px !important;
+  }
+
+  /*弹窗样式*/
+  .diaBox p {
+    float: left;
+    margin-top: 23px;
+  }
+
+  .diaBox .eqiIp {
+    margin-left: 15px;
+  }
+
+  .diaBox input {
+    width: 384px;
+    height: 23px;
+    float: left;
+    margin-top: 16px;
+    margin-left: 10px;
+    border: 1px solid #e8e8e8;
+  }
+
+  .diaBox .el-table >>> .cell {
+    text-align: center;
+  }
+
+  .bottom_area >>> .el-dialog__header {
+    height: 36px;
+    background-color: #66bded;
+    padding: 7px 20px 0px !important;
+  }
+
+  .bottom_area >>> .el-dialog--center {
+    width: 633px;
+  }
+
+  .bottom_area >>> .el-dialog__body {
+    padding: 0 !important;
+  }
+
+  .bottom_area >>> .el-dialog__title {
+    color: #fff;
+    font-size: 14px;
+  }
+
+  .bottom_area >>> .el-dialog__headerbtn {
+    top: 12px !important;
+  }
+
+  .bottom_area >>> .el-dialog__headerbtn .el-dialog__close {
+    color: #fff;
+  }
+
+  .bottom_area >>> .el-button--small, .el-button--small.is-round {
+    width: 80px;
+    padding: 5px 15px !important;
+  }
+
+  .bottom_area .add {
+    width: 75px;
+    height: 28px;
+    background-color: #fff;
+    display: inline-block;
+    color: #66bded;
+    margin-top: 14px;
+    margin-left: 10px;
+    font-weight: bold;
+    border: 1px solid #a3d7f4;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px 2px rgba(145, 208, 243, 0.3);
+    cursor: pointer;
+  }
+
+  .bottom_area .search {
+    width: 75px;
+    height: 28px;
+    background-color: #fff;
+    display: inline-block;
+    color: #666666;
+    margin-top: 14px;
+    margin-left: 10px;
+    font-weight: bold;
+    border: 1px solid #d9d9d9;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+
+  /*主体背景部分*/
+  .system_main {
+    height: 87vh;
+    min-width: 1060px;
+    background-color: #f6f7ff
+  }
+
+  .system_main i {
+    display: inline-block;
+    color: #444;
+    font-size: 12px;
+    margin-top: 17px;
+    margin-left: 18px;
+  }
+
+  /*上半部分*/
+  .top_area {
+    height: 9vh;
+    min-width: 1060px;
+    margin: 11px 18px 0;
+    background-color: #fff;
+    box-shadow: 0 0 8px 3px rgba(0, 0, 0, 0.1);
+  }
+
+  /*搜索框*/
+  .top_area .search {
+    float: left;
+    width: 270px;
+    height: 20px;
+    margin-left: 24px;
+    margin-top: 15px;
+  }
+
+  .top_area >>> .el-input__inner {
+    height: 27px;
+  }
+
+  .top_area >>> .el-select .el-input .el-select__caret {
+    line-height: 12px;
+  }
+
+  .top_area .but {
+    float: left;
+    display: inline-block;
+    margin-top: 15px;
+  }
+
+  .top_area .but button {
+    width: 72px;
+    height: 27px;
+    margin-left: 15px;
+    border: none;
+    background-color: #43abe9;
+    border-radius: 5px;
+    color: #fff;
+    box-shadow: 0 2px 5px 2px rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+  }
+
+  /*下半部分*/
+  .bottom_area {
+    height: 66vh;
+    min-width: 1060px;
+    margin: 17px 18px 0;
+    background-color: #fff;
+    box-shadow: 0 0 8px 3px rgba(0, 0, 0, 0.1);
+  }
+
+  .bottom_area .btn0, .bottom_area .btn1 {
+    display: inline-block;
+    color: #66bded;
+    cursor: pointer;
+    background-color: #fff;
+    border: 1px solid #a3d7f4;
+    box-shadow: 0 2px 5px 2px rgba(145, 208, 243, 0.3);
+    width: 95px;
+    height: 28px;
+    font-weight: bold;
+  }
+
+  .bottom_area >>> .btn1 {
+    margin-left: 52px;
+    color: #fff !important;
+    background-color: #66bded;
+  }
+
+  /*主体表格样式*/
+  .bottom_area >>> .el-table tr {
+    height: 29px !important;
+  }
+
+  .bottom_area >>> .tableHead {
+    font-size: 14px;
+    font-family: '黑体';
+  }
+</style>
+
