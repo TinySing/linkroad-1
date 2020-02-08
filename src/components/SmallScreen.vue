@@ -1,14 +1,35 @@
 <template>
   <div class="main_bgm" :style="bgImg">
     <div class="nav" :style="navImg">
-      <input placeholder="点击选择系统"
+
+      <div class="nav-back">
+        <img src="../../static/img/back.png" alt="">
+        <span >返回</span>
+      </div>
+
+
+
+      <div class="system" @click="centerDialog = true">
+        <h2 v-text="indexText"></h2>
+        <i class="el-icon-arrow-down"></i>
+      </div>
+
+
+      <div class="scale">
+        <img src="../../static/img/scaleSmall.png" alt="">
+        <span >缩小</span>
+      </div>
+
+
+
+    <!--  <input placeholder="点击选择系统"
              class="system"
              type="text"
              value=""
              @click="centerDialog = true"
              v-model="indexText"
-      />
-      <i class="el-icon-arrow-down"></i>
+      />-->
+
       <el-dialog
         title="请选择您的系统"
         :visible.sync="centerDialog"
@@ -73,16 +94,32 @@
           </div>
         </span>
       </el-dialog>
-      <el-select v-model="valueOne" placeholder="请选择" @change="">
-        <el-option
-          v-for="item in optionsOne"
-          :key="item.valueOne"
-          :label="item.labelOne"
-          :value="item.valueOne">
-        </el-option>
-      </el-select>
-      <h2 style="display: inline-block">截止到{{ nowDate + ' ' + nowTime + ' ' + nowWeek }}</h2>
+
+
+
+
+
+      <div class="select-time">[
+        <el-select v-model="valueOne" placeholder="请选择" @change="">
+          <el-option
+            v-for="item in optionsOne"
+            :key="item.valueOne"
+            :label="item.labelOne"
+            :value="item.valueOne">
+          </el-option>
+        </el-select>
+        <span >( 截止到:{{ nowDate + ' ' + nowTime + ' '}} )</span>
+        ]
+
+      </div>
+
+
     </div>
+
+
+
+
+
     <div class="left">
       <div class="disc">
         <Disc></Disc>
@@ -161,7 +198,7 @@
         currentPage: 1,
         pageSize: 8,
         sysList: [], //选择系统弹窗显示的系统的列表
-        indexText: '',
+        indexText: '点击选择系统',
         valueOne: 'One',
         optionsOne: [
           {
@@ -187,6 +224,9 @@
       }
     },
     methods: {
+
+
+
       currentTime() {
         setInterval(this.getDate, 500);
       },
@@ -201,7 +241,7 @@
           new Date().getMinutes() < 10
             ? "0" + new Date().getMinutes()
             : new Date().getMinutes();
-        if (week == 1) {
+      /*  if (week == 1) {
           this.nowWeek = "星期一";
         } else if (week == 2) {
           this.nowWeek = "星期二";
@@ -215,9 +255,9 @@
           this.nowWeek = "星期六";
         } else {
           this.nowWeek = "星期日";
-        }
+        }*/
         _this.nowTime = hh + ":" + mf;
-        _this.nowDate = yy + "/" + mm + "/" + dd;
+        _this.nowDate = yy + "-" + mm + "-" + dd;
       },
       dialogData() {
         let qs = require('qs');
@@ -327,6 +367,44 @@
   .nav {
     width: 100%;
     height: 8vh;
+
+  }
+  .nav-back{
+    width: 50px;
+    height: 20px;
+    position: absolute;
+    top: 5%;
+    left: 2%;
+    margin-top: 4px;
+  }
+  .nav-back img{
+    width: 10px;
+    height: 10px ;
+  }
+  .nav-back span{
+    color: #fff;
+    font-weight: bold;
+  }
+
+  .scale{
+    width: 8vh;
+    height: 2vh;
+    position: absolute;
+    top: 5.4vh;
+    left: 68%;
+    /*margin-top: 4px;*/
+  }
+  .scale img{
+    width: 2.3vh;
+    height: 2.3vh ;
+    float: left;
+  }
+  .scale span{
+    color: #fff;
+    font-weight: bold;
+    float: left;
+    font-size: 2vh;
+    margin-top:-0.3vh
   }
 
   .left {
@@ -488,23 +566,31 @@
 
   /*选择系统的部分*/
   .nav .system {
-    margin-left: 85vh;
-    /*margin:0 auto;*/
-    display: inline-block;
-    /*width: 182px;*/
+    position: absolute;
+    left: 50%;
+    transform: translate(-50%);
+    text-align:center;
     width: 47vh;
-    height: 32px;
-    /*padding-right: 20px;*/
-    border: none;
+    height: 45px;
     font-size: 18px;
-    color: #606266;
-    /*padding-left: 13px;*/
-    /*background-color: rgba(255,255,255,0.9);*/
+    color: #FFF;
     background-color: #128fd0;
     cursor: pointer;
+
+  }
+  .nav .system h2{
+    display: inline-block;
+    line-height: 45px;
+    font-weight: bold;
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis
+  }
+  .nav .system i{
+    font-size: 18px;
+    position: absolute;
+    top: 50%;
+    transform: translate(5px, -40%);
   }
 
   .el-icon-arrow-down {
@@ -512,4 +598,72 @@
     color: #fff;
     font-size: 4vh;
   }
+  .select-time{
+    position: absolute;
+    top: 4.5vh;
+    left: 74%;
+    /*margin-top: 6px;*/
+    width: 25vw;
+    font-size: 2.3vh;
+    color: #fff;
+    z-index: 99;
+  }
+  .select-time span{
+    position: absolute;
+    left: 30%;
+    z-index: -98;
+
+  }
+  .select-time >>>.el-select{
+    width: 90%;
+    height: 20px;
+  }
+  .select-time >>>.el-select .el-input{
+    width: 100%;
+    height: 20px;
+    font-size: 2.3vh;
+  }
+  .select-time >>>.el-select .el-input__inner{
+    -webkit-appearance: none;
+    background-color: transparent;
+    background-image: none;
+    border-radius: 4px;
+    border: none;
+    -webkit-box-sizing: border-box;
+    box-sizing: border-box;
+     color: #fff;
+    display: inline-block;
+    font-size: inherit;
+    line-height: 20px;
+    outline: 0;
+    /* padding: 0 15px; */
+    -webkit-transition: border-color .2s cubic-bezier(.645,.045,.355,1);
+    transition: border-color .2s cubic-bezier(.645,.045,.355,1);
+    width: 100%;
+    height: 20px;
+    padding: 0px!important;
+  }
+  .select-time >>>.el-select  .el-input__suffix{
+    top: 1px;
+    right: -3px;
+
+  }
+  .select-time >>>.el-select .el-input__icon{
+
+    line-height: 20px;
+  }.select-time >>>.el-select .el-input__icon{
+
+       color: #fff;
+  }
+  .right >>>.el-table th>.cell{
+    height: 4vh;
+    line-height: 30px;
+  }
+
+  .right >>> .el-table .cell.el-tooltip{
+    height: 4vh;
+    line-height: 4vh;
+  }
+
+
 </style>

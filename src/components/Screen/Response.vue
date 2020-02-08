@@ -11,7 +11,7 @@
       <el-table-column
         prop="childSystem"
         label="子系统名称"
-        width="90"
+        width="100"
         :show-overflow-tooltip="true"
       >
       </el-table-column>
