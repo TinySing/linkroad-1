@@ -890,11 +890,6 @@
           // console.log(response)
           this.tableDataTop = [];
           for (let i = 0; i < response.data.length; i++) {
-            if (response.data[i]['isSuccess'] === 'Y') {
-              response.data[i]['isSuccess'] = '成功'
-            } else {
-              response.data[i]['isSuccess'] = '失败'
-            }
             this.tableDataTop.push({
               'id': i,
               'appCode': response.data[i]['appCode'],
@@ -922,11 +917,6 @@
           // console.log(response)
           this.tableDataRes = [];
           for (let i = 0; i < response.data.length; i++) {
-            if (response.data[i]['isSuccess'] === 'Y') {
-              response.data[i]['isSuccess'] = '成功'
-            } else {
-              response.data[i]['isSuccess'] = '失败'
-            }
             this.tableDataRes.push({
               'appCode': response.data[i]['appCode'],
               'appName': response.data[i]['appName'],

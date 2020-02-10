@@ -48,8 +48,8 @@
 
 <script>
   export default {
-    name: "SlowSQL",
-    data() {
+    name: 'SlowSQL',
+    data () {
       return {
         tableData: [{
           childSystem: '2016-05-02',
@@ -83,6 +83,46 @@
           time: '28374'
         }]
       }
+    },
+    props: [
+      'code',
+      'time'
+    ],
+    methods: {
+      slowTop () {
+        let qs = require('qs')
+        let information = {
+          'appCode': this.code,
+          'timeType': this.time,
+          'type': 'MonitorTwelve'
+        }
+        console.log(information)
+        this.$axios.post('/monitorCon/sqlTop/queryTop', qs.stringify(information)).then((response) => {
+          console.log(response)
+          // this.tableDataTop = [];
+          // for (let i = 0; i < response.data.length; i++) {
+          //   this.tableData.push({
+          //     'moudleName': response.data[i]['moudleName'],
+          //     'sqlContent': response.data[i]['sqlContent'],
+          //     'caller': response.data[i]['caller'],
+          //     'controlTime': response.data[i]['controlTime'],
+          //     'respTime': response.data[i]['respTime'],
+          //   });
+          // }
+        })
+      },
+    },
+    watch: {
+      code: function (value) {
+        this.slowTop()
+      }
+      ,
+      time: function (value) {
+        this.slowTop()
+      }
+    },
+    mounted () {
+      this.slowTop() //函数调用
     }
   }
 </script>
@@ -95,6 +135,7 @@
 
   .nav_table {
     background-color: #128fd0;
+    margin-top: -1px;
     width: 100%;
     height: 4vh;
   }

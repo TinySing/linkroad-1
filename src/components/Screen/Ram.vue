@@ -7,7 +7,14 @@
 <script>
     export default {
         name: "Ram",
+        props:[
+          'code',
+          "time"
+        ],
       methods:{
+          test(){
+            console.log(222)
+          },
           draw(){
             let chartRam = this.$echarts.init(document.getElementById('chartRam'));
             let option = {
@@ -77,8 +84,20 @@
             chartRam.setOption(option, true);
         }
       },
+      watch:{
+          code: function (value) {
+            console.log(value)
+            console.log(this.time)
+          },
+          time:function (value) {
+            console.log(this.code)
+            console.log(value)
+          }
+      },
       mounted() {
-        this.draw() //函数调用
+          console.log(this.code)
+          console.log(this.time)
+         this.draw() //函数调用
       }
     }
 </script>
